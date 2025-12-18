@@ -2,180 +2,309 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Elad Feldman | Personal Page</title>
+  <title>Elad Feldman | PhD Student</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Personal website of Elad Feldman.">
+  <meta name="description" content="Academic homepage of Elad Feldman, PhD student at Tel Aviv University working on AI security and machine learning robustness.">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #0b1120;
-      --bg-alt: #020617;
+      --bg: #020617;
       --text: #e5e7eb;
       --text-muted: #9ca3af;
       --link: #38bdf8;
-      --link-hover: #7dd3fc;
-      --accent-soft: rgba(56,189,248,0.1);
-      --border: rgba(148,163,184,0.2);
+      --link-hover: #0ea5e9;
+      --accent-soft: rgba(56,189,248,0.12);
+      --border: rgba(148,163,184,0.3);
     }
-    
-    * { box-sizing: border-box; margin:0; padding:0; }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: "Inter", sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 60%, #000 100%);
+      font-family: "Inter", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0%, #020617 55%, #000 100%);
       color: var(--text);
-      line-height: 1.7;
-      font-size: 17px;
-      padding: 100px 20px 60px;
+      line-height: 1.8;
+      font-size: 18px;
+      padding: 96px 20px 60px;
       display: flex;
       justify-content: center;
-      opacity: 0; /* For fade-in effect */
-      animation: fadeIn 0.8s ease-out forwards;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
+    .page {
+      width: 100%;
+      max-width: 820px;
     }
 
-    .page { width: 100%; max-width: 800px; }
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+    a:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
 
-    a { color: var(--link); text-decoration: none; transition: 0.2s; }
-    a:hover { color: var(--link-hover); }
-
-    /* Glassmorphism Nav */
+    /* Top Navigation */
     .top-nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 1000;
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(15,23,42,0.9);
+      backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
     }
+
     .nav-inner {
-      max-width: 800px;
+      max-width: 820px;
       margin: 0 auto;
-      padding: 15px 20px;
+      padding: 12px 20px;
       display: flex;
       justify-content: center;
     }
-    .nav-list { list-style: none; display: flex; gap: 25px; }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      gap: 22px;
+      font-size: 0.9rem;
+    }
+
     .nav-link {
       color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 500;
+      padding-bottom: 2px;
     }
-    .nav-link:hover { color: var(--link); }
 
-    /* Header Section */
+    .nav-link:hover {
+      color: var(--link);
+      border-bottom: 1px solid var(--link);
+      text-decoration: none;
+    }
+
+    /* Header */
     header {
       display: flex;
       align-items: center;
-      gap: 32px;
-      margin-bottom: 40px;
+      gap: 28px;
+      margin-bottom: 36px;
     }
+
     .headshot {
-      width: 160px;
-      height: 160px;
-      border-radius: 24px; /* Modern rounded square */
+      width: 190px;
+      height: 190px;
+      border-radius: 999px;
       object-fit: cover;
-      border: 1px solid var(--border);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      border: 2px solid var(--border);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.6);
+      background: #020617;
     }
-    h1 { font-size: 2.5rem; font-weight: 600; letter-spacing: -0.02em; }
-    .tagline { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 8px; }
-    
-    .social-links { display: flex; gap: 15px; margin-top: 12px; }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .tagline {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .meta {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .meta span + span::before {
+      content: " · ";
+      margin: 0 4px;
+    }
+
+    .links {
+      margin-top: 10px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
     .btn-sm {
       font-size: 0.85rem;
       padding: 4px 12px;
       border-radius: 6px;
       background: var(--accent-soft);
-      border: 1px solid var(--link);
+      border: 1px solid var(--border);
     }
 
-    section { margin-bottom: 40px; }
+    main { margin-top: 10px; }
+
+    section { margin-bottom: 34px; }
+
     h2 {
-      font-size: 1.2rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--link);
-      margin-bottom: 15px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 10px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 8px;
+      padding-bottom: 6px;
     }
+
+    p {
+      font-size: 0.98rem;
+      margin-bottom: 12px;
+    }
+
+    ul {
+      padding-left: 20px;
+      font-size: 0.98rem;
+    }
+
+    li + li { margin-top: 6px; }
 
     footer {
-      border-top: 1px solid var(--border);
-      padding-top: 20px;
-      font-size: 0.8rem;
+      margin-top: 28px;
+      font-size: 0.85rem;
       color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
       text-align: center;
     }
 
-    @media (max-width: 600px) {
-      header { flex-direction: column; text-align: center; gap: 16px; }
-      .nav-list { gap: 15px; }
+    @media (max-width: 700px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .headshot {
+        width: 170px;
+        height: 170px;
+      }
+      h1 { font-size: 2.1rem; }
     }
   </style>
 </head>
+
 <body>
 
-  <nav class="top-nav">
-    <div class="nav-inner">
-      <ul class="nav-list">
-        <li><a class="nav-link" href="#about">About</a></li>
-        <li><a class="nav-link" href="#projects">Projects</a></li>
-        <li><a class="nav-link" href="#contact">Contact</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <div class="page">
-    <header>
-      <img src="me.jpg" alt="Elad Feldman" class="headshot" onerror="this.style.display='none'">
-      <div>
-        <h1>Elad Feldman</h1>
-        <div class="tagline">Software Engineer & Tech Enthusiast</div>
-        <div class="social-links">
-          <a href="https://github.com/eladfeld" class="btn-sm">GitHub</a>
-          <a href="#" class="btn-sm">LinkedIn</a>
-          <a href="mailto:your-email@example.com" class="btn-sm">Email</a>
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <section id="about">
-        <h2>About Me</h2>
-        <p>
-          Hi, I'm Elad. I am passionate about building clean, efficient, and user-centric software. 
-          Currently exploring new technologies and building projects on GitHub.
-        </p>
-      </section>
-
-      <section id="projects">
-        <h2>Featured Projects</h2>
-        <p>Stay tuned! I'm currently migrating my portfolio to this new site.</p>
-        </section>
-
-      <section id="contact">
-        <h2>Get In Touch</h2>
-        <p>I'm always open to discussing new projects or opportunities. Feel free to reach out via email or connect with me on social media.</p>
-      </section>
-    </main>
-
-    <footer>
-      <p>&copy; <span id="year"></span> Elad Feldman. Built with HTML/CSS.</p>
-    </footer>
+<nav class="top-nav">
+  <div class="nav-inner">
+    <ul class="nav-list">
+      <li><a class="nav-link" href="#about">About</a></li>
+      <li><a class="nav-link" href="#research">Research</a></li>
+      <li><a class="nav-link" href="#publications">Publications</a></li>
+      <li><a class="nav-link" href="#background">Background</a></li>
+      <li><a class="nav-link" href="#contact">Contact</a></li>
+    </ul>
   </div>
+</nav>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+<div class="page">
+
+<header>
+  <img src="me.jpg" alt="Photo of Elad Feldman" class="headshot" onerror="this.style.display='none'">
+
+  <div>
+    <h1>Elad Feldman</h1>
+    <div class="tagline">
+      PhD Student, Tel Aviv University
+    </div>
+
+    <div class="meta">
+      <span>
+        Advised by
+        <a href="https://en-engineering.tau.ac.il/profile/nassiben" target="_blank" rel="noopener noreferrer">
+          Dr. Ben&nbsp;Nassi
+        </a>
+      </span>
+      <span>AI security · LLM safety · adversarial ML</span>
+    </div>
+
+    <div class="links">
+      <a href="https://github.com/eladfeld" class="btn-sm" target="_blank">GitHub</a>
+      <a href="#" class="btn-sm">Google Scholar</a>
+      <a href="mailto:your-email@example.com" class="btn-sm">Email</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="about">
+  <h2>About</h2>
+  <p>
+    I am a PhD student at Tel Aviv University, supervised by
+    <a href="https://en-engineering.tau.ac.il/profile/nassiben" target="_blank" rel="noopener noreferrer">
+      Dr. Ben&nbsp;Nassi
+    </a>.
+    My research focuses on the security and robustness of modern machine learning systems,
+    with a particular emphasis on large language models and AI systems deployed in real-world environments.
+  </p>
+
+  <p>
+    I am interested in understanding failure modes of learning-based systems under adversarial,
+    unexpected, or malicious inputs, and in developing practical, model-agnostic defenses.
+  </p>
+</section>
+
+<section id="research">
+  <h2>Research</h2>
+  <p>
+    My research interests include:
+  </p>
+
+  <ul>
+    <li>Security and safety of large language models</li>
+    <li>Adversarial machine learning and robustness evaluation</li>
+    <li>LLM-based systems and agent security</li>
+    <li>Model-agnostic defenses and empirical benchmarks</li>
+  </ul>
+</section>
+
+<section id="publications">
+  <h2>Publications</h2>
+  <p>
+    Publications and preprints will be listed here.
+    Manuscripts are currently under preparation.
+  </p>
+</section>
+
+<section id="background">
+  <h2>Background</h2>
+  <p>
+    Prior to my PhD, I gained extensive experience in software engineering and applied machine learning,
+    working on end-to-end systems that combine learning-based components with real-world constraints.
+  </p>
+
+  <p>
+    This background strongly shapes my research approach, emphasizing practical relevance,
+    reproducibility, and deployment-aware evaluation of AI security methods.
+  </p>
+</section>
+
+<section id="contact">
+  <h2>Contact</h2>
+  <p>
+    The best way to reach me is via email:
+    <a href="mailto:your-email@example.com">your-email@example.com</a>.
+  </p>
+</section>
+
+</main>
+
+<footer>
+  © <span id="year"></span> Elad Feldman
+</footer>
+
+</div>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
 </body>
 </html>
