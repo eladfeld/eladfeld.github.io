@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paraphrase Adjudicator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ---------------------------------------------------------------- tokens
+   Light palette is the complete set on bare :root. Dark redefines only
+   tokens, twice: once for prefers-color-scheme (guarded so an explicit
+   light choice still wins) and once for an explicit dark choice. No
+   component rule below ever names a colour directly. */
+:root {
+  --ground:      #F6F7F9;
+  --surface:     #FFFFFF;
+  --surface-sunk:#EEF0F4;
+  --ink:         #11151E;
+  --ink-soft:    #3D4552;
+  --muted:       #6B7484;
+  --line:        #DCE0E7;
+  --line-strong: #C3C9D4;
+  --accent:      #2C46CE;
+  --accent-soft: #E6EAFB;
+  --on-accent:   #FFFFFF;
+  --del:         #A81D3C;
+  --del-bg:      #FBE6EB;
+  --ins:         #0B6F61;
+  --ins-bg:      #DFF3EF;
+  --warn:        #8A5300;
+  --warn-bg:     #FCF0DC;
+  --shadow:      0 1px 2px rgba(17,21,30,.05), 0 8px 24px -12px rgba(17,21,30,.18);
+  --radius:      10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #0D1017;
+    --surface:     #151A23;
+    --surface-sunk:#1E242F;
+    --ink:         #E7EAF0;
+    --ink-soft:    #BAC2CF;
+    --muted:       #8A94A4;
+    --line:        #2A313D;
+    --line-strong: #3B4453;
+    --accent:      #8A9EFF;
+    --accent-soft: #1E2540;
+    --on-accent:   #0D1017;
+    --del:         #FF8098;
+    --del-bg:      #3A1A24;
+    --ins:         #3FD3BC;
+    --ins-bg:      #10322E;
+    --warn:        #E8B45F;
+    --warn-bg:     #33270F;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --ground:      #0D1017;
+  --surface:     #151A23;
+  --surface-sunk:#1E242F;
+  --ink:         #E7EAF0;
+  --ink-soft:    #BAC2CF;
+  --muted:       #8A94A4;
+  --line:        #2A313D;
+  --line-strong: #3B4453;
+  --accent:      #8A9EFF;
+  --accent-soft: #1E2540;
+  --on-accent:   #0D1017;
+  --del:         #FF8098;
+  --del-bg:      #3A1A24;
+  --ins:         #3FD3BC;
+  --ins-bg:      #10322E;
+  --warn:        #E8B45F;
+  --warn-bg:     #33270F;
+  --shadow:      0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+* { box-sizing: border-box; }
+html { color-scheme: light dark; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Familjen Grotesk", ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted); margin: 0;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px 48px; }
+
+/* ---------------------------------------------------------------- header */
+header { border-bottom: 1px solid var(--line); background: var(--surface); padding: 22px 0 18px; }
+.head-inner { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+h1 { font-size: 21px; font-weight: 700; margin: 2px 0 14px; letter-spacing: -.015em; }
+.loader { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.loader input[type=url] {
+  flex: 1 1 340px; min-width: 0; padding: 9px 11px;
+  border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground);
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px;
+}
+.btn {
+  padding: 9px 15px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line-strong); background: var(--surface);
+  font-weight: 500; transition: background .12s, border-color .12s;
+}
+.btn:hover { background: var(--surface-sunk); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--muted); }
+.btn-ghost:hover { background: var(--surface-sunk); color: var(--ink); }
+
+.note { margin-top: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; }
+.note code {
+  font-family: "JetBrains Mono", monospace; font-size: 12px;
+  background: var(--surface-sunk); padding: 1px 4px; border-radius: 4px;
+}
+details.fallback { margin-top: 10px; }
+details.fallback summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+details.fallback textarea {
+  width: 100%; margin-top: 8px; min-height: 110px; resize: vertical; padding: 10px;
+  border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground);
+  font-family: "JetBrains Mono", monospace; font-size: 12px;
+}
+
+/* ------------------------------------------------------------ range bar */
+.rangebar {
+  display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: flex-end;
+  margin: 18px 0 0; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field > label {
+  font-size: 11px; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muted);
+}
+.field input[type=number], .field select {
+  padding: 7px 9px; border: 1px solid var(--line-strong);
+  border-radius: 7px; background: var(--ground); font-variant-numeric: tabular-nums;
+}
+.field input[type=number] { width: 84px; }
+.grow { flex: 1 1 auto; }
+
+.tally { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pill {
+  padding: 3px 9px; border-radius: 999px; font-size: 12px;
+  font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.pill-same    { background: var(--ins-bg);  color: var(--ins); }
+.pill-diff    { background: var(--del-bg);  color: var(--del); }
+.pill-invalid { background: var(--warn-bg); color: var(--warn); }
+.pill-todo    { background: var(--surface-sunk); color: var(--muted); }
+.track { height: 4px; border-radius: 999px; background: var(--surface-sunk); overflow: hidden; display: flex; }
+.track > span { height: 100%; }
+.track .s { background: var(--ins); }
+.track .d { background: var(--del); }
+.track .i { background: var(--warn); }
+
+/* ----------------------------------------------------------------- card */
+.card {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  margin-top: 16px; overflow: hidden;
+}
+.card-head {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 13px 18px; border-bottom: 1px solid var(--line); background: var(--surface-sunk);
+}
+.rowid { font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 13px; color: var(--ink-soft); }
+.chip {
+  padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase;
+  background: var(--accent-soft); color: var(--accent);
+}
+.counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.changes { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.changes-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.change {
+  font-family: "JetBrains Mono", monospace; font-size: 12px; padding: 3px 8px;
+  border-radius: 6px; background: var(--surface-sunk); border: 1px solid var(--line);
+}
+.change del { color: var(--del); text-decoration: line-through; }
+.change ins { color: var(--ins); text-decoration: none; }
+.change .arrow { color: var(--muted); padding: 0 3px; }
+.sheet-said { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+
+.panes { padding: 4px 18px 16px; }
+.pane { padding: 14px 0; }
+.pane + .pane { border-top: 1px dashed var(--line); }
+.pane-body {
+  font-family: "Source Serif 4", ui-serif, Georgia, serif;
+  font-size: 16.5px; line-height: 1.62; max-width: 68ch;
+  margin-top: 6px; overflow-wrap: break-word;
+}
+/* No line-through here. On a rewrite that touches many words, a rule through
+   every one of them makes the sentence genuinely hard to read, and reading it
+   is the whole task. The tint plus the colour carries "removed" on its own;
+   the compact chips above keep the strikethrough, where it is short enough to
+   help rather than obstruct. */
+.pane-body del {
+  background: var(--del-bg); color: var(--del); text-decoration: none;
+  padding: 0 2px; border-radius: 3px;
+}
+.pane-body ins {
+  background: var(--ins-bg); color: var(--ins); text-decoration: none;
+  padding: 0 2px; border-radius: 3px; font-weight: 600;
+}
+.elision {
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--muted);
+  background: var(--surface-sunk); border: 1px solid var(--line);
+  border-radius: 5px; padding: 1px 6px; margin: 0 3px; cursor: pointer;
+}
+.elision:hover { color: var(--ink); border-color: var(--line-strong); }
+
+/* --------------------------------------------------------------- verdict
+   Sticky at the top rather than fixed at the bottom: the verdict controls
+   have to stay reachable while scrolling a long mmlu stem, and putting them
+   above the text means the eye goes controls -> question -> verdict without
+   crossing the page. */
+.verdict {
+  position: sticky; top: 0; z-index: 20; margin-top: 16px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.verdict-inner {
+  padding: 12px 16px;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+}
+#labelSel { padding: 9px 12px; border-radius: 8px; min-width: 186px; border: 1px solid var(--line-strong); background: var(--ground); font-weight: 500; }
+#labelSel[data-value="same"] { border-color: var(--ins); color: var(--ins); }
+#labelSel[data-value="different"] { border-color: var(--del); color: var(--del); }
+#labelSel[data-value="invalid question"] { border-color: var(--warn); color: var(--warn); }
+#noteInput {
+  flex: 1 1 180px; min-width: 0; padding: 9px 11px;
+  border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ground);
+}
+kbd {
+  font-family: "JetBrains Mono", monospace; font-size: 11px;
+  border: 1px solid var(--line-strong); border-bottom-width: 2px;
+  border-radius: 5px; padding: 1px 5px; color: var(--muted); background: var(--ground);
+}
+.keys { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); padding-bottom: 8px; }
+.empty { padding: 46px 18px; text-align: center; color: var(--muted); }
+.empty strong { display: block; color: var(--ink); font-size: 17px; margin-bottom: 6px; }
+@media (max-width: 780px) { .keys { display: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <p class="eyebrow">Paraphrase validator audit</p>
+    <h1>Paraphrase Adjudicator</h1>
+    <div class="loader">
+      <input type="url" id="sheetUrl" spellcheck="false"
+             placeholder="Google Sheets link, or a published CSV link">
+      <button class="btn btn-primary" id="loadBtn">Load sheet</button>
+      <button class="btn btn-ghost" id="themeBtn">Theme</button>
+    </div>
+    <div class="note" id="loadNote" hidden></div>
+    <details class="fallback" id="fallback">
+      <summary>Sheet won't load? Paste the CSV or pick a file instead</summary>
+      <textarea id="pasteBox" spellcheck="false" placeholder="Paste CSV here, including the header row"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn" id="pasteBtn">Use pasted CSV</button>
+        <input type="file" id="fileInput" accept=".csv,text/csv">
+      </div>
+    </details>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="rangebar" id="rangebar" hidden>
+    <div class="field">
+      <label for="fromIdx">From row</label>
+      <input type="number" id="fromIdx" min="1" value="1">
+    </div>
+    <div class="field">
+      <label for="toIdx">To row</label>
+      <input type="number" id="toIdx" min="1" value="1">
+    </div>
+    <div class="field">
+      <label for="dsFilter">Dataset</label>
+      <select id="dsFilter"><option value="">all</option></select>
+    </div>
+    <div class="grow"></div>
+    <div class="field">
+      <label>Progress</label>
+      <div class="tally" id="tally"></div>
+    </div>
+    <div class="field">
+      <label>Labels</label>
+      <div style="display:flex;gap:6px">
+        <button class="btn" id="copyBtn" title="Tab-separated, pastes into adjacent sheet columns">Copy for Sheets</button>
+        <button class="btn" id="exportBtn">Download CSV</button>
+      </div>
+    </div>
+    <div style="flex:1 1 100%"><div class="track" id="track"></div></div>
+  </div>
+
+  <div class="verdict" id="verdict" hidden>
+    <div class="verdict-inner">
+      <div class="field">
+        <label for="labelSel">Verdict</label>
+        <select id="labelSel">
+          <option value="">— choose —</option>
+          <option value="same">same</option>
+          <option value="different">different</option>
+          <option value="invalid question">invalid question</option>
+        </select>
+      </div>
+      <input type="text" id="noteInput" placeholder="Note (optional)">
+      <button class="btn" id="prevBtn">&larr; Prev</button>
+      <button class="btn btn-primary" id="nextBtn">Next &rarr;</button>
+      <button class="btn btn-ghost" id="jumpBtn">Next unlabelled</button>
+      <div class="keys">
+        <span><kbd>1</kbd> same</span><span><kbd>2</kbd> different</span>
+        <span><kbd>3</kbd> invalid</span><span><kbd>&larr;</kbd><kbd>&rarr;</kbd> move</span><span><kbd>f</kbd> full text</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div class="card"><div class="empty">
+      <strong>No rows loaded</strong>
+      Paste a Google Sheets link above, or open the fallback and paste the CSV.
+    </div></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const LABELS = ["same", "different", "invalid question"];
+const KEYMAP = { "1": "same", "2": "different", "3": "invalid question" };
+const CONTEXT = 12;   // unchanged words kept either side of an edit
+
+let rows = [], view = [], cursor = 0, store = {}, expanded = false;
+let storeKey = "paraphrase-adjudicator:default";
+
+/* ------------------------------------------------------------------- CSV
+   Hand-rolled to RFC 4180 because the questions contain commas, quotes and
+   newlines inside quoted fields. A split(",") parser shreds the mmlu rows
+   and you would not notice until a verdict looked absurd. */
+function parseCSV(text) {
+  const out = [];
+  let row = [], field = "", inQuotes = false, i = 0;
+  text = text.replace(/^﻿/, "");
+  while (i < text.length) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ",") { row.push(field); field = ""; i++; continue; }
+    if (c === "\r") { i++; continue; }
+    if (c === "\n") { row.push(field); out.push(row); row = []; field = ""; i++; continue; }
+    field += c; i++;
+  }
+  if (field !== "" || row.length) { row.push(field); out.push(row); }
+  return out.filter(r => r.some(v => v.trim() !== ""));
+}
+
+function pick(header, candidates) {
+  const norm = header.map(h => h.trim().toLowerCase());
+  for (const cand of candidates) {
+    const at = norm.indexOf(cand);
+    if (at !== -1) return at;
+  }
+  return -1;
+}
+
+function ingest(text) {
+  const table = parseCSV(text);
+  if (table.length < 2) { fail("That CSV has a header but no data rows."); return; }
+  const header = table[0];
+  const iId   = pick(header, ["row_id", "id", "index"]);
+  const iDs   = pick(header, ["dataset", "source"]);
+  const iOrig = pick(header, ["original_question", "original", "question"]);
+  const iPara = pick(header, ["paraphrase", "attacked_question", "candidate", "rewrite"]);
+  const iChg  = pick(header, ["what_changed", "changed", "diff"]);
+  const iLab  = pick(header, ["same_meaning", "label", "verdict"]);
+  const iNote = pick(header, ["notes", "note", "comment"]);
+
+  if (iOrig === -1 || iPara === -1) {
+    fail("Couldn't find the columns. The header needs an <code>original_question</code> " +
+         "column and a <code>paraphrase</code> column. Found: <code>" +
+         esc(header.join(", ")) + "</code>");
+    return;
+  }
+
+  rows = table.slice(1).map((r, n) => ({
+    rowId: (iId !== -1 ? (r[iId] || "").trim() : "") || "r" + String(n + 1).padStart(3, "0"),
+    dataset: iDs !== -1 ? (r[iDs] || "").trim() : "",
+    original: (r[iOrig] || "").trim(),
+    paraphrase: (r[iPara] || "").trim(),
+    changed: iChg !== -1 ? (r[iChg] || "").trim() : "",
+    seedLabel: iLab !== -1 ? (r[iLab] || "").trim().toLowerCase() : "",
+    seedNote: iNote !== -1 ? (r[iNote] || "").trim() : ""
+  }));
+
+  // Verdicts already written into the sheet are honoured, so a part-finished
+  // pass resumes instead of starting over.
+  store = loadStore();
+  rows.forEach(r => {
+    if (!store[r.rowId] && (LABELS.includes(r.seedLabel) || r.seedNote)) {
+      store[r.rowId] = { label: LABELS.includes(r.seedLabel) ? r.seedLabel : "", note: r.seedNote };
+    }
+  });
+  saveStore();
+
+  const datasets = [...new Set(rows.map(r => r.dataset).filter(Boolean))].sort();
+  document.getElementById("dsFilter").innerHTML =
+    '<option value="">all</option>' +
+    datasets.map(d => '<option value="' + esc(d) + '">' + esc(d) + "</option>").join("");
+
+  const from = document.getElementById("fromIdx"), to = document.getElementById("toIdx");
+  from.value = 1; from.max = rows.length;
+  to.value = rows.length; to.max = rows.length;
+  document.getElementById("rangebar").hidden = false;
+  document.getElementById("verdict").hidden = false;
+  document.getElementById("fallback").open = false;
+  say("Loaded " + rows.length + " rows." +
+      (datasets.length ? " Datasets: " + esc(datasets.join(", ")) + "." : ""), false);
+  rebuildView(true);
+}
+
+/* -------------------------------------------------------------- word diff
+   Recomputed here rather than trusting the sheet's what_changed column, so
+   the tool works on any sheet and so edits can be highlighted in place
+   instead of only summarised. */
+function tokenize(s) { return s.split(/(\s+)/).filter(t => t !== ""); }
+
+function diffTokens(a, b) {
+  const n = a.length, m = b.length;
+  // Trim the common head and tail first. On a 900-word stem with a one-word
+  // edit this takes the table from ~800k cells to a handful.
+  let head = 0;
+  while (head < n && head < m && a[head] === b[head]) head++;
+  let tail = 0;
+  while (tail < n - head && tail < m - head && a[n - 1 - tail] === b[m - 1 - tail]) tail++;
+  const A = a.slice(head, n - tail), B = b.slice(head, m - tail);
+  const ops = [];
+  for (let i = 0; i < head; i++) ops.push(["=", a[i]]);
+  const R = A.length, C = B.length;
+  if (R * C > 4000000) {
+    if (R) ops.push(["-", A.join("")]);
+    if (C) ops.push(["+", B.join("")]);
+  } else {
+    const dp = Array.from({ length: R + 1 }, () => new Uint32Array(C + 1));
+    for (let i = R - 1; i >= 0; i--)
+      for (let j = C - 1; j >= 0; j--)
+        dp[i][j] = A[i] === B[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    let i = 0, j = 0;
+    while (i < R && j < C) {
+      if (A[i] === B[j]) { ops.push(["=", A[i]]); i++; j++; }
+      else if (dp[i + 1][j] >= dp[i][j + 1]) { ops.push(["-", A[i]]); i++; }
+      else { ops.push(["+", B[j]]); j++; }
+    }
+    while (i < R) { ops.push(["-", A[i]]); i++; }
+    while (j < C) { ops.push(["+", B[j]]); j++; }
+  }
+  for (let k = m - tail; k < m; k++) ops.push(["=", b[k]]);
+  return ops;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+/* One side of the comparison: the original keeps equals and deletions, the
+   paraphrase keeps equals and insertions. Long unchanged runs collapse to a
+   chip unless expanded — without that, a one-word edit inside a long passage
+   is unfindable by eye, which is the whole difficulty with this data. */
+function renderSide(ops, side) {
+  const keep = side === "original" ? "-" : "+";
+  const parts = [];
+  let run = [];
+  const flushRun = isLast => {
+    if (!run.length) return;
+    const words = run.filter(t => t.trim() !== "").length;
+    if (expanded || words <= CONTEXT * 2) { parts.push(esc(run.join(""))); run = []; return; }
+    const isFirst = parts.length === 0;
+    const headTok = [], tailTok = [];
+    let count = 0;
+    for (const t of run) { headTok.push(t); if (t.trim()) count++; if (count >= CONTEXT) break; }
+    count = 0;
+    for (let k = run.length - 1; k >= 0; k--) {
+      tailTok.unshift(run[k]); if (run[k].trim()) count++; if (count >= CONTEXT) break;
+    }
+    const hidden = words - CONTEXT * 2;
+    parts.push((isFirst ? "" : esc(headTok.join(""))) +
+      '<button class="elision" data-expand="1">' + hidden + " unchanged words</button>" +
+      (isLast ? "" : esc(tailTok.join(""))));
+    run = [];
+  };
+  for (const op of ops) {
+    if (op[0] === "=") { run.push(op[1]); continue; }
+    if (op[0] === keep) {
+      flushRun(false);
+      const tag = keep === "-" ? "del" : "ins";
+      parts.push("<" + tag + ">" + esc(op[1]) + "</" + tag + ">");
+    }
+  }
+  flushRun(true);
+  return parts.join("") || "<em>(empty)</em>";
+}
+
+function changeChips(ops) {
+  const chips = [];
+  let dels = [], inss = [];
+  const flush = () => {
+    const d = dels.join("").trim(), i = inss.join("").trim();
+    if (d && i) chips.push("<del>" + esc(d) + '</del><span class="arrow">&rarr;</span><ins>' + esc(i) + "</ins>");
+    else if (d) chips.push("removed <del>" + esc(d) + "</del>");
+    else if (i) chips.push("added <ins>" + esc(i) + "</ins>");
+    dels = []; inss = [];
+  };
+  for (const op of ops) {
+    if (op[0] === "=") {
+      // Whitespace between two changed words is an "equal" op. Dropping it
+      // welds the words together — "the green pigment" became
+      // "thegreenpigment" — so keep it inside an open run and only close the
+      // run on a real unchanged word.
+      if (op[1].trim() === "") {
+        if (dels.length) dels.push(op[1]);
+        if (inss.length) inss.push(op[1]);
+      } else {
+        flush();
+      }
+      continue;
+    }
+    (op[0] === "-" ? dels : inss).push(op[1]);
+  }
+  flush();
+  return chips;
+}
+
+/* ------------------------------------------------------------------- view */
+function rebuildView(reset) {
+  const from = Math.max(1, +document.getElementById("fromIdx").value || 1);
+  const to = Math.min(rows.length, +document.getElementById("toIdx").value || rows.length);
+  const ds = document.getElementById("dsFilter").value;
+  view = [];
+  for (let i = from - 1; i <= to - 1; i++) {
+    if (i < 0 || i >= rows.length) continue;
+    if (ds && rows[i].dataset !== ds) continue;
+    view.push(i);
+  }
+  if (reset || cursor >= view.length) cursor = 0;
+  render();
+}
+
+function render() {
+  const stage = document.getElementById("stage");
+  if (!view.length) {
+    stage.innerHTML = '<div class="card"><div class="empty"><strong>Nothing in that range</strong>' +
+      'Widen the row range, or set the dataset filter back to "all".</div></div>';
+    renderTally();
+    return;
+  }
+  const r = rows[view[cursor]];
+  const rec = store[r.rowId] || { label: "", note: "" };
+  const ops = diffTokens(tokenize(r.original), tokenize(r.paraphrase));
+  const chips = changeChips(ops);
+
+  stage.innerHTML =
+    '<div class="card"><div class="card-head">' +
+      '<span class="rowid">' + esc(r.rowId) + "</span>" +
+      (r.dataset ? '<span class="chip">' + esc(r.dataset) + "</span>" : "") +
+      '<span class="grow"></span>' +
+      '<span class="counter">' + (cursor + 1) + " of " + view.length +
+        " in range &middot; row " + (view[cursor] + 1) + " of " + rows.length + "</span>" +
+    "</div>" +
+    '<div class="changes"><p class="eyebrow">What changed</p><div class="changes-list">' +
+      (chips.length ? chips.map(c => '<span class="change">' + c + "</span>").join("")
+                    : '<span class="change">no textual difference</span>') +
+    "</div>" +
+      (r.changed && !chips.length
+        ? '<p class="sheet-said">Sheet recorded: ' + esc(r.changed) + "</p>" : "") +
+    "</div>" +
+    '<div class="panes">' +
+      '<div class="pane"><p class="eyebrow">Original question</p>' +
+        '<div class="pane-body">' + renderSide(ops, "original") + "</div></div>" +
+      '<div class="pane"><p class="eyebrow">Paraphrase</p>' +
+        '<div class="pane-body">' + renderSide(ops, "paraphrase") + "</div></div>" +
+      '<div class="pane" style="border:0;padding-bottom:0">' +
+        '<button class="btn btn-ghost" id="toggleBtn" style="padding-left:0">' +
+        (expanded ? "Collapse unchanged text" : "Show full text") + "</button></div>" +
+    "</div></div>";
+
+  const sel = document.getElementById("labelSel");
+  sel.value = rec.label || "";
+  sel.dataset.value = rec.label || "";
+  document.getElementById("noteInput").value = rec.note || "";
+  renderTally();
+}
+
+function renderTally() {
+  const counts = { same: 0, different: 0, "invalid question": 0, todo: 0 };
+  view.forEach(i => {
+    const l = (store[rows[i].rowId] || {}).label;
+    if (LABELS.includes(l)) counts[l]++; else counts.todo++;
+  });
+  const n = Math.max(view.length, 1);
+  document.getElementById("tally").innerHTML =
+    '<span class="pill pill-same">' + counts.same + " same</span>" +
+    '<span class="pill pill-diff">' + counts.different + " diff</span>" +
+    '<span class="pill pill-invalid">' + counts["invalid question"] + " invalid</span>" +
+    '<span class="pill pill-todo">' + counts.todo + " left</span>";
+  document.getElementById("track").innerHTML =
+    '<span class="s" style="width:' + (counts.same / n * 100) + '%"></span>' +
+    '<span class="d" style="width:' + (counts.different / n * 100) + '%"></span>' +
+    '<span class="i" style="width:' + (counts["invalid question"] / n * 100) + '%"></span>';
+}
+
+/* ------------------------------------------------------------ persistence */
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(storeKey) || "{}"); } catch (e) { return {}; }
+}
+function saveStore() {
+  try { localStorage.setItem(storeKey, JSON.stringify(store)); } catch (e) { /* private mode */ }
+}
+function setLabel(label) {
+  if (!view.length) return;
+  const r = rows[view[cursor]];
+  store[r.rowId] = { label: label, note: document.getElementById("noteInput").value };
+  saveStore();
+  const sel = document.getElementById("labelSel");
+  sel.value = label; sel.dataset.value = label;
+  renderTally();
+}
+function move(delta) {
+  if (!view.length) return;
+  cursor = Math.min(view.length - 1, Math.max(0, cursor + delta));
+  render();
+}
+function jumpUnlabelled() {
+  for (let k = 1; k <= view.length; k++) {
+    const at = (cursor + k) % view.length;
+    if (!LABELS.includes((store[rows[view[at]].rowId] || {}).label)) { cursor = at; render(); return; }
+  }
+  say("Every row in this range has a verdict.", false);
+}
+
+/* ----------------------------------------------------------------- export */
+function labelTable() {
+  const head = ["row_id", "dataset", "same_meaning", "notes"];
+  const body = rows.map(r => {
+    const rec = store[r.rowId] || { label: "", note: "" };
+    return [r.rowId, r.dataset, rec.label || "", rec.note || ""];
+  });
+  return [head].concat(body);
+}
+function toCSV(table) {
+  return table.map(r => r.map(v =>
+    /[",\n]/.test(v) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(",")).join("\n");
+}
+function download() {
+  const blob = new Blob([toCSV(labelTable())], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "paraphrase_labels.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+async function copyForSheets() {
+  const tsv = labelTable().map(r => r.join("\t")).join("\n");
+  try {
+    await navigator.clipboard.writeText(tsv);
+    say("Copied " + rows.length + " rows. Paste into the sheet beside the row_id column.", false);
+  } catch (e) {
+    const box = document.getElementById("pasteBox");
+    document.getElementById("fallback").open = true;
+    box.value = tsv;
+    box.select();
+    say("The browser blocked the clipboard — the rows are in the box below, ready to copy.", true);
+  }
+}
+
+/* ----------------------------------------------------------------- sheets */
+function sheetCsvUrl(raw) {
+  const url = (raw || "").trim();
+  if (!url) return null;
+  if (/output=csv|format=csv|tqx=out:csv/.test(url)) return url;   // already CSV
+  const id = (url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/) || [])[1];
+  if (!id) return null;
+  const gid = (url.match(/[#&?]gid=([0-9]+)/) || [])[1] || "0";
+  return "https://docs.google.com/spreadsheets/d/" + id + "/export?format=csv&gid=" + gid;
+}
+async function loadSheet() {
+  const target = sheetCsvUrl(document.getElementById("sheetUrl").value);
+  if (!target) {
+    fail("That doesn't look like a Google Sheets link — it should contain " +
+         "<code>/spreadsheets/d/&lt;id&gt;</code>.");
+    return;
+  }
+  storeKey = "paraphrase-adjudicator:" + target;
+  say("Fetching…", false);
+  try {
+    const res = await fetch(target, { redirect: "follow" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    if (/^\s*<(!doctype|html)/i.test(text)) throw new Error("got a sign-in page rather than CSV");
+    ingest(text);
+  } catch (e) {
+    // Overwhelmingly the cause: Google serves the export endpoint without
+    // CORS headers, so the browser refuses the response even for a public
+    // sheet. Publishing to the web produces an endpoint that does allow it.
+    fail("Couldn't read the sheet (" + esc(e.message) + "). A browser can only read a " +
+         "sheet that is <strong>published to the web</strong>: in Sheets, " +
+         "<em>File &rarr; Share &rarr; Publish to web &rarr; Comma-separated values</em>, " +
+         "then paste that link here. Or use <em>File &rarr; Download &rarr; CSV</em> and " +
+         "load the file below.");
+    document.getElementById("fallback").open = true;
+  }
+}
+
+function say(html, isProblem) {
+  const n = document.getElementById("loadNote");
+  n.innerHTML = html;
+  n.hidden = false;
+  n.style.background = isProblem ? "var(--warn-bg)" : "var(--accent-soft)";
+  n.style.color = isProblem ? "var(--warn)" : "var(--accent)";
+}
+function fail(html) { say(html, true); }
+
+/* ----------------------------------------------------------------- wiring */
+document.getElementById("loadBtn").addEventListener("click", loadSheet);
+document.getElementById("sheetUrl").addEventListener("keydown", e => { if (e.key === "Enter") loadSheet(); });
+document.getElementById("pasteBtn").addEventListener("click", () => {
+  const text = document.getElementById("pasteBox").value;
+  if (!text.trim()) { fail("The box is empty — paste the CSV including its header row."); return; }
+  storeKey = "paraphrase-adjudicator:pasted";
+  ingest(text);
+});
+document.getElementById("fileInput").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  storeKey = "paraphrase-adjudicator:file:" + file.name;
+  const fr = new FileReader();
+  fr.onload = () => ingest(String(fr.result));
+  fr.onerror = () => fail("Couldn't read that file.");
+  fr.readAsText(file);
+});
+["fromIdx", "toIdx", "dsFilter"].forEach(id =>
+  document.getElementById(id).addEventListener("change", () => rebuildView(true)));
+document.getElementById("labelSel").addEventListener("change", e => {
+  if (e.target.value) setLabel(e.target.value);
+});
+document.getElementById("noteInput").addEventListener("input", () => {
+  if (!view.length) return;
+  const r = rows[view[cursor]];
+  const rec = store[r.rowId] || { label: "", note: "" };
+  store[r.rowId] = { label: rec.label || "", note: document.getElementById("noteInput").value };
+  saveStore();
+});
+document.getElementById("prevBtn").addEventListener("click", () => move(-1));
+document.getElementById("nextBtn").addEventListener("click", () => move(1));
+document.getElementById("jumpBtn").addEventListener("click", jumpUnlabelled);
+document.getElementById("exportBtn").addEventListener("click", download);
+document.getElementById("copyBtn").addEventListener("click", copyForSheets);
+document.getElementById("stage").addEventListener("click", e => {
+  if (e.target.closest("#toggleBtn")) { expanded = !expanded; render(); return; }
+  if (e.target.dataset && e.target.dataset.expand) { expanded = true; render(); }
+});
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const root = document.documentElement;
+  const now = root.getAttribute("data-theme");
+  const dark = now ? now === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  root.setAttribute("data-theme", dark ? "light" : "dark");
+});
+/* When the tool is hosted beside its own copy of the audit CSV, load it on
+   open so a partner has nothing to set up. Same-origin, so no CORS problem —
+   unlike a Google Sheet. Silent no-op when the file isn't there (opened as a
+   local file, or hosted alone), leaving the manual loaders in charge. */
+(async function bootstrapBundled() {
+  const BUNDLED = "./validation_audit.csv";
+  try {
+    const res = await fetch(BUNDLED, { cache: "no-store" });
+    if (!res.ok) return;
+    const text = await res.text();
+    if (/^\s*<(!doctype|html)/i.test(text)) return;   // a 404 page, not CSV
+    storeKey = "paraphrase-adjudicator:bundled";
+    ingest(text);
+  } catch (e) {
+    // file:// origins and hosts without the CSV both land here. Nothing to
+    // report: the paste box and file picker are already on screen.
+  }
+})();
+
+document.addEventListener("keydown", e => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select") {
+    if (e.key === "Escape") e.target.blur();
+    return;
+  }
+  if (KEYMAP[e.key]) { e.preventDefault(); setLabel(KEYMAP[e.key]); move(1); return; }
+  if (e.key === "ArrowRight" || e.key === "j") { e.preventDefault(); move(1); }
+  if (e.key === "ArrowLeft" || e.key === "k") { e.preventDefault(); move(-1); }
+  if (e.key === "u") { e.preventDefault(); jumpUnlabelled(); }
+  if (e.key === "f") { e.preventDefault(); expanded = !expanded; render(); }
+});
+</script>
+</body>
+</html>
