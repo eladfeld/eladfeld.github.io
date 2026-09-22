@@ -187,10 +187,6 @@
     .thumb { position: relative; }
     .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 4px; }
     .thumb:has(.thumb-ph) { background: #f4f2ec; }
-    /* Wide banner figures: full-width image above the text */
-    .pub-wide { grid-template-columns: 1fr; gap: 16px; }
-    .pub-wide .thumb { aspect-ratio: auto; }
-    .pub-wide .thumb img { position: static; height: auto; padding: 8px; }
     .thumb-ph { color: var(--muted); font-size: .75rem; text-align: center; padding: 8px; }
     .thumb-ph svg { width: 34px; height: 34px; display: block; margin: 0 auto 6px; opacity: .6; }
 
@@ -367,7 +363,7 @@
       </div>
     </li>
 
-    <li class="pub pub-wide">
+    <li class="pub">
       <div class="thumb"><img src="img/promptware-kill-chain.png" alt="The seven stages of the Promptware Kill Chain" loading="lazy"></div>
       <div>
         <div class="venue">arXiv · 2026</div>
