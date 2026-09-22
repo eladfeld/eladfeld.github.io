@@ -166,6 +166,88 @@
 
     li + li { margin-top: 6px; }
 
+    /* Publications */
+    .pub-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .pub {
+      background: rgba(15,23,42,0.55);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--link);
+      border-radius: 10px;
+      padding: 16px 18px;
+      line-height: 1.6;
+      transition: border-color .15s, transform .15s;
+    }
+    .pub:hover { border-color: rgba(56,189,248,0.6); transform: translateY(-1px); }
+    .pub-list .pub + .pub { margin-top: 14px; }
+
+
+    .pub-title { display: block; font-size: 1.02rem; font-weight: 600; color: #f8fafc; }
+    .pub-authors { font-size: 0.9rem; color: var(--text-muted); }
+    .pub-authors strong { color: var(--text); }
+    .pub-note { font-size: 0.8rem; }
+    .pub-where { font-size: 0.88rem; color: var(--text-muted); font-style: italic; }
+
+    .pub-links, .pub-media {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .pub-media-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-right: 2px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 4px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--accent-soft);
+      color: var(--link);
+      line-height: 1.4;
+      transition: filter .15s, transform .15s;
+    }
+    .chip:hover { text-decoration: none; filter: brightness(1.15); transform: translateY(-1px); }
+    .chip svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* Media outlets: brand-colored pills */
+    .chip-ars     { background: #ff4e00; border-color: #ff4e00; color: #fff; }
+    .chip-ars .ars-mark {
+      display: inline-grid; place-items: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; color: #ff4e00;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: -.02em;
+    }
+    .chip-wired   { background: #fff; border-color: #fff; color: #000;
+                    font-weight: 800; letter-spacing: .12em; font-family: "Arial Black", Inter, sans-serif; }
+    .chip-lawfare { background: #1c2a48; border-color: #b08d57; color: #f1e6d0;
+                    font-family: Georgia, "Times New Roman", serif; font-weight: 700; }
+    .chip-youtube { background: #ff0000; border-color: #ff0000; color: #fff; }
+    .chip-ars:hover, .chip-youtube:hover { color: #fff; }
+    .chip-wired:hover { color: #000; }
+    .chip-lawfare:hover { color: #f1e6d0; }
+
+    .pub-subhead {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin: 26px 0 10px;
+    }
+
     footer {
       margin-top: 28px;
       font-size: 0.85rem;
@@ -268,36 +350,103 @@
 <section id="publications">
   <h2>Publications</h2>
 
+  <!-- Inline icons, referenced below with <use href="#i-..."> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-pdf" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></g></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="4" fill="#fff"/><path d="M10 8.5v7l6-3.5z" fill="#ff0000"/></symbol>
+  </svg>
+
   <ul class="pub-list">
-    <li>
-      <strong>
+    <li class="pub">
+      <span class="pub-title">
+        Defusing Explosive Prompts: Understanding and Preventing Trigger-Based Prompt Injections
+        in LLM Agents
+      </span>
+      <div class="pub-authors">J. Szczepaniak*, <strong>E. Feldman</strong>*, N. Viner, B. Nassi <span class="pub-note">(*equal contribution)</span></div>
+      <div class="pub-where">arXiv preprint arXiv:2609.22510, 2026</div>
+      <div class="pub-links">
+        <a class="chip" href="https://arxiv.org/pdf/2609.22510" target="_blank" rel="noopener noreferrer"><svg><use href="#i-pdf"/></svg>Paper</a>
+        <a class="chip" href="https://explosive-prompts-site.pages.dev" target="_blank" rel="noopener noreferrer"><svg><use href="#i-globe"/></svg>Website</a>
+      </div>
+    </li>
+
+    <li class="pub">
+      <span class="pub-title">
+        Beware of Agentic Botnets: Scalable Untargeted Promptware Attacks via Universal and
+        Transferable Adversarial HalluSquatting
+      </span>
+      <div class="pub-authors">A. Spira, S. Cohen, <strong>E. Feldman</strong>, R. Bitton, A. Wool, B. Nassi</div>
+      <div class="pub-where">arXiv preprint arXiv:2607.07433, 2026</div>
+      <div class="pub-links">
+        <a class="chip" href="https://arxiv.org/pdf/2607.07433" target="_blank" rel="noopener noreferrer"><svg><use href="#i-pdf"/></svg>Paper</a>
+        <a class="chip" href="https://sites.google.com/view/agentic-botnets/home" target="_blank" rel="noopener noreferrer"><svg><use href="#i-globe"/></svg>Website</a>
+      </div>
+      <div class="pub-media">
+        <span class="pub-media-label">Featured in</span>
+        <a class="chip chip-ars" href="https://arstechnica.com/security/2026/07/hackers-can-use-9-of-the-most-popular-ai-tools-to-assemble-massive-botnets/" target="_blank" rel="noopener noreferrer"><span class="ars-mark">ars</span>Ars Technica</a>
+      </div>
+    </li>
+
+    <li class="pub">
+      <span class="pub-title">
+        The Promptware Kill Chain: How Prompt Injections Gradually Evolved Into a Multistep
+        Malware Delivery Mechanism
+      </span>
+      <div class="pub-authors">O. Brodt, <strong>E. Feldman</strong>, B. Schneier, B. Nassi</div>
+      <div class="pub-where">arXiv preprint arXiv:2601.09625, 2026</div>
+      <div class="pub-links">
+        <a class="chip" href="https://arxiv.org/pdf/2601.09625" target="_blank" rel="noopener noreferrer"><svg><use href="#i-pdf"/></svg>Paper</a>
+      </div>
+      <div class="pub-media">
+        <span class="pub-media-label">Featured in</span>
+        <a class="chip chip-lawfare" href="https://www.lawfaremedia.org/article/the-promptware-kill-chain" target="_blank" rel="noopener noreferrer">Lawfare</a>
+        <a class="chip chip-youtube" href="https://www.youtube.com/watch?v=K68sqG18270" target="_blank" rel="noopener noreferrer"><svg><use href="#i-play"/></svg>IBM Technology</a>
+      </div>
+    </li>
+
+    <li class="pub">
+      <span class="pub-title">
         PaniCar: Securing the Perception of Advanced Driving Assistance Systems Against
         Emergency Vehicle Lighting
-      </strong><br>
-      <strong>E. Feldman</strong>, et al.<br>
-      <em>arXiv preprint</em>, 2025.<br>
-      [<a href="https://arxiv.org/pdf/2505.05183" target="_blank" rel="noopener noreferrer">paper</a>]
-      [<a href="https://www.wired.com/story/emergency-vehicle-lights-can-screw-up-a-cars-automated-driving-system/"
-          target="_blank" rel="noopener noreferrer">media</a>]
+      </span>
+      <div class="pub-authors"><strong>E. Feldman</strong>, J. Shams, D. Biton, A. Chen, S. Xie, S. Koda, Y. Mirsky, A. Shabtai, Y. Elovici, B. Nassi</div>
+      <div class="pub-where">arXiv preprint arXiv:2505.05183, 2025</div>
+      <div class="pub-links">
+        <a class="chip" href="https://arxiv.org/pdf/2505.05183" target="_blank" rel="noopener noreferrer"><svg><use href="#i-pdf"/></svg>Paper</a>
+      </div>
+      <div class="pub-media">
+        <span class="pub-media-label">Featured in</span>
+        <a class="chip chip-wired" href="https://www.wired.com/story/emergency-vehicle-lights-can-screw-up-a-cars-automated-driving-system/" target="_blank" rel="noopener noreferrer">WIRED</a>
+      </div>
     </li>
 
-    <li>
-      <strong>
-        Hate Speech Targets Detection in Parler using BERT
-      </strong><br>
-      <strong>E. Feldman</strong>, et al.<br>
-      <em>arXiv preprint</em>, 2023.<br>
-      [<a href="https://arxiv.org/pdf/2304.01179" target="_blank" rel="noopener noreferrer">paper</a>]
+    <li class="pub">
+      <span class="pub-title">Hate Speech Targets Detection in Parler using BERT</span>
+      <div class="pub-authors">N. Schneider, S. Shouei, S. Ghantous, <strong>E. Feldman</strong></div>
+      <div class="pub-where">arXiv preprint arXiv:2304.01179, 2023</div>
+      <div class="pub-links">
+        <a class="chip" href="https://arxiv.org/pdf/2304.01179" target="_blank" rel="noopener noreferrer"><svg><use href="#i-pdf"/></svg>Paper</a>
+      </div>
     </li>
 
-    <li>
-      <strong>
-        Demo: Identifying Drones Based on Visual Tokens
-      </strong><br>
-      <strong>E. Feldman</strong>, et al.<br>
-      <em>Network and Distributed System Security Symposium (NDSS), AutoSec Workshop</em>, 2022.<br>
-      [<a href="https://www.ndss-symposium.org/wp-content/uploads/autosec2022_23002_paper.pdf"
-          target="_blank" rel="noopener noreferrer">paper</a>]
+    <li class="pub">
+      <span class="pub-title">Demo: Identifying Drones Based on Visual Tokens</span>
+      <div class="pub-authors">B. Nassi, <strong>E. Feldman</strong>, A. Levy, Y. Pirutin, A. Shabtai, R. Masuoka, Y. Elovici</div>
+      <div class="pub-where">Network and Distributed System Security Symposium (NDSS), AutoSec Workshop, 2022</div>
+      <div class="pub-links">
+        <a class="chip" href="https://www.ndss-symposium.org/wp-content/uploads/autosec2022_23002_paper.pdf" target="_blank" rel="noopener noreferrer"><svg><use href="#i-pdf"/></svg>Paper</a>
+        <a class="chip chip-youtube" href="https://www.youtube.com/watch?v=VjBpREcMibs" target="_blank" rel="noopener noreferrer"><svg><use href="#i-play"/></svg>Demo video</a>
+      </div>
+    </li>
+  </ul>
+
+  <h3 class="pub-subhead">Patents</h3>
+  <ul class="pub-list">
+    <li class="pub">
+      <span class="pub-title">Non-transitory Computer-Readable Recording Medium, Detection Method, and Detection Device</span>
+      <div class="pub-authors"><strong>E. Feldman</strong>, J. Shams, S. Koda, Y. Mirsky, A. Shabtai, Y. Elovici, B. Nassi</div>
+      <div class="pub-where">US Patent Application 19/350,130, 2026</div>
     </li>
   </ul>
 </section>
